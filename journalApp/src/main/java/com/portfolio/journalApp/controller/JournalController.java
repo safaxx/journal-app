@@ -9,6 +9,8 @@ import com.portfolio.journalApp.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -24,27 +26,19 @@ public class JournalController {
     private final JournalService service;
     private final UserService userService;
 
+
     @GetMapping("/all")
-    public ResponseEntity<?> getAllJournalEntries() {
-        List<JournalEntry> allEntries = service.getAllEntries();
+    public ResponseEntity<?> getAllJournalEntriesOfUser(@AuthenticationPrincipal UserDetails userDetails) {
+        List<JournalEntry> allEntries = service.getAllEntries(userDetails.getUsername());
         if (allEntries != null && !allEntries.isEmpty()) {
             return new ResponseEntity<>(allEntries, HttpStatus.OK);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new ResponseDTO("No entries found for: "+ userDetails.getUsername()),HttpStatus.NOT_FOUND);
     }
 
-    @GetMapping("/all/{username}")
-    public ResponseEntity<?> getAllJournalEntriesOfUser(@PathVariable String username) {
-        List<JournalEntry> allEntries = service.getAllEntries(username);
-        if (allEntries != null && !allEntries.isEmpty()) {
-            return new ResponseEntity<>(allEntries, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(new ResponseDTO("No entries found for "+username),HttpStatus.NOT_FOUND);
-    }
-
-    @PostMapping("/create/{username}")
-    public ResponseEntity<ResponseDTO> createEntryForUser(@RequestBody JournalEntry entry, @PathVariable String username) {
-        JournalEntry newEntry = service.saveEntry(entry, username);
+    @PostMapping("/create")
+    public ResponseEntity<ResponseDTO> createEntryForUser(@RequestBody JournalEntry entry, @AuthenticationPrincipal UserDetails userDetails) {
+        JournalEntry newEntry = service.saveEntry(entry, userDetails.getUsername());
         if (newEntry != null) {
             return new ResponseEntity<>(
                     new ResponseDTO("New journal entry created", newEntry),
@@ -54,15 +48,15 @@ public class JournalController {
                 HttpStatus.BAD_REQUEST);
     }
 
-    @GetMapping("/id/{entryId}")
-    public ResponseEntity<JournalEntry> getEntryById(@PathVariable String entryId) {
-        Optional<JournalEntry> entry = service.findEntryById(entryId);
-        if (entry.isPresent()) {
-            return new ResponseEntity<>(entry.get(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-    }
+//    @GetMapping("/{title}")
+//    public ResponseEntity<JournalEntry> getEntryByTitle(@PathVariable String title) {
+//        Optional<JournalEntry> entry = service.findEntryById(title);
+//        if (entry.isPresent()) {
+//            return new ResponseEntity<>(entry.get(), HttpStatus.OK);
+//        } else {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+//    }
 
     @PutMapping("/update/{entryId}")
     public ResponseEntity<JournalEntry> updateEntryById(@PathVariable String entryId,

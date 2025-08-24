@@ -29,15 +29,11 @@ public class UserService {
 
     }
 
-    public void deleteEntry(String id, String username) {
-
-    }
-
     public User updateUserDetails(User existingUser, User updatedUser) {
         existingUser.setUsername(updatedUser.getUsername()!=null ? updatedUser.getUsername() : existingUser.getUsername());
         existingUser.setPassword(updatedUser.getPassword()!=null ? updatedUser.getPassword() : existingUser.getPassword());
         existingUser.setRoles(updatedUser.getRoles()!=null ? updatedUser.getRoles(): existingUser.getRoles());
-        return saveUserInfo(existingUser);
+        return userRepository.save(existingUser);
     }
 
     public void deleteUser(String existingUser) {

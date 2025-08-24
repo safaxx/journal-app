@@ -1,5 +1,7 @@
 package com.portfolio.journalApp.service;
 
+import com.portfolio.journalApp.dto.JournalEntryDTO;
+import com.portfolio.journalApp.dto.UserJournalEntryDTO;
 import com.portfolio.journalApp.entity.JournalEntry;
 import com.portfolio.journalApp.entity.User;
 import com.portfolio.journalApp.exceptions.ResourceNotFoundException;
@@ -12,8 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -42,8 +43,30 @@ public class JournalService {
         return user.getEntries();
     }
 
-    public List<JournalEntry> getAllEntries() {
-        return repository.findAll();
+    public  List<UserJournalEntryDTO> getAllEntriesForAdmin() {
+        List<JournalEntry> all = repository.findAll();
+        Map<String, List<JournalEntry>> userJournalMap = new HashMap<>();
+        for(JournalEntry e: all){
+            userJournalMap
+                    .computeIfAbsent(e.getUser().getUsername(), k -> new ArrayList<>())
+                    .add(e);
+        }
+        List<UserJournalEntryDTO> list = new ArrayList<>();
+        for(Map.Entry<String, List<JournalEntry>> entry: userJournalMap.entrySet()){
+            UserJournalEntryDTO dto = new UserJournalEntryDTO();
+            dto.setUsername(entry.getKey());
+            ArrayList<JournalEntryDTO> dtoList = new ArrayList<>();
+            for(JournalEntry je: entry.getValue()){
+                JournalEntryDTO jeDto = new JournalEntryDTO();
+                jeDto.setCreatedDate(je.getCreatedDate());
+                jeDto.setTitle(je.getTitle());
+                jeDto.setContent(je.getContent());
+                dtoList.add(jeDto);
+            }
+            dto.setJournalEntries(dtoList);
+            list.add(dto);
+        }
+        return list;
     }
 
     public Optional<JournalEntry> findEntryById(String id) {
