@@ -21,16 +21,6 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/all")
-    public ResponseEntity<?> getAllUsers() {
-        List<User> users = userService.findAllUsers();
-        if (users != null && !users.isEmpty()) {
-            return new ResponseEntity<>(users, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(users, HttpStatus.NOT_FOUND);
-    }
-
-
     @GetMapping("/{username}")
     public ResponseEntity<?> getUserByUsername(@PathVariable String username) {
         User u = userService.findUser(username);
@@ -61,7 +51,7 @@ public class UserController {
     public ResponseEntity<ResponseDTO> deleteUser(@AuthenticationPrincipal UserDetails userDetails){
         User existingUser = userService.findUser(userDetails.getUsername());
         userService.deleteUser(userDetails.getUsername());
-        return new ResponseEntity<>(new ResponseDTO("User delete successfully"), HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(new ResponseDTO("User deleted successfully"), HttpStatus.NO_CONTENT);
     }
 
 

@@ -33,5 +33,7 @@ public class User {
     //creating reference of journalEntry in users collection
     @DBRef
     @JsonManagedReference
-    private List<JournalEntry> entries = new ArrayList<>();
+    private ArrayList<JournalEntry> entries = new ArrayList<>();
+
+
 }

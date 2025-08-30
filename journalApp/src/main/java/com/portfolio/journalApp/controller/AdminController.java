@@ -4,15 +4,13 @@ import com.portfolio.journalApp.dto.JournalEntryDTO;
 import com.portfolio.journalApp.dto.ResponseDTO;
 import com.portfolio.journalApp.dto.UserJournalEntryDTO;
 import com.portfolio.journalApp.entity.JournalEntry;
+import com.portfolio.journalApp.entity.User;
 import com.portfolio.journalApp.service.JournalService;
 import com.portfolio.journalApp.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,5 +42,23 @@ public class AdminController {
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+    @GetMapping("/user/all")
+    public ResponseEntity<?> getAllUsers() {
+        List<User> users = userService.findAllUsers();
+        if (users != null && !users.isEmpty()) {
+            return new ResponseEntity<>(users, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(users, HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping("/user/create-admin")
+    public ResponseEntity<ResponseDTO> createAdminUser(@RequestBody User user){
+        User newUser = userService.saveAdminUser(user);
+        if(newUser!=null){
+            return new ResponseEntity<>( new ResponseDTO("New user entry created", newUser),
+                    HttpStatus.CREATED);
+        }
+        return new ResponseEntity<>(new ResponseDTO("User creation failed"),HttpStatus.BAD_REQUEST);
     }
 }
