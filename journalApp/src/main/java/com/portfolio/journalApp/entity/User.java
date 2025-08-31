@@ -1,8 +1,8 @@
 package com.portfolio.journalApp.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
-import lombok.experimental.NonFinal;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -26,7 +26,14 @@ public class User {
     private String username;
 
     @NonNull
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) // Hide password in JSON responses
     private String password;
+
+    private String email;
+
+    private LocalDateTime createdDate;
+
+    private LocalDateTime lastLoginDate;
 
     private List<String> roles;
 
@@ -35,5 +42,13 @@ public class User {
     @JsonManagedReference
     private ArrayList<JournalEntry> entries = new ArrayList<>();
 
-
+    // Constructor for backward compatibility
+    public User(String id, String username, String password, List<String> roles, ArrayList<JournalEntry> entries) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.roles = roles;
+        this.entries = entries;
+        this.createdDate = LocalDateTime.now();
+    }
 }

@@ -11,10 +11,25 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ResponseDTO {
 
+    private boolean success;
     private String message;
     private Object data;
 
     public ResponseDTO(String message){
         this.message = message;
+    }
+    public ResponseDTO(boolean success, String message){
+        this.message = message;
+        this.success = success;
+    }
+
+    public ResponseDTO(boolean success, Object data){
+        this.data = data;
+        this.success = success;
+    }
+
+    public ResponseDTO(String message, Object data){
+        this.message = message;
+        this.data = data;
     }
 }

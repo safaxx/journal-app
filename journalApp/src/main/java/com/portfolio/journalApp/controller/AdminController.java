@@ -1,6 +1,6 @@
 package com.portfolio.journalApp.controller;
 
-import com.portfolio.journalApp.dto.JournalEntryDTO;
+import com.portfolio.journalApp.dto.RegisterRequestDTO;
 import com.portfolio.journalApp.dto.ResponseDTO;
 import com.portfolio.journalApp.dto.UserJournalEntryDTO;
 import com.portfolio.journalApp.entity.JournalEntry;
@@ -52,13 +52,26 @@ public class AdminController {
         return new ResponseEntity<>(users, HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping("/user/create-admin")
-    public ResponseEntity<ResponseDTO> createAdminUser(@RequestBody User user){
-        User newUser = userService.saveAdminUser(user);
-        if(newUser!=null){
-            return new ResponseEntity<>( new ResponseDTO("New user entry created", newUser),
-                    HttpStatus.CREATED);
+    @PostMapping("/sign-up")
+    public ResponseEntity<ResponseDTO> signUpAdminUser(@RequestBody RegisterRequestDTO requestDTO) {
+
+        try {
+            if (userService.findUser(requestDTO.getUsername()) != null) {
+                return new ResponseEntity<>(new ResponseDTO("User already exists"), HttpStatus.BAD_REQUEST);
+            }
+
+            User user = new User();
+            user.setUsername(requestDTO.getUsername());
+            user.setPassword(requestDTO.getPassword());
+
+            User newUser = userService.saveAdminUser(user);
+            if (newUser != null) {
+                return new ResponseEntity<>(new ResponseDTO(true, "User Admin registered successfully", newUser),
+                        HttpStatus.CREATED);
+            }
+            return new ResponseEntity<>(new ResponseDTO(false, "User Admin registration failed"), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ResponseDTO(false, "User Admin registration failed" + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(new ResponseDTO("User creation failed"),HttpStatus.BAD_REQUEST);
     }
 }
