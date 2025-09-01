@@ -26,6 +26,7 @@ public class UserService {
     public User saveUserInfo(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRoles(List.of("USER"));
+        user.setCreatedDate(LocalDateTime.now());
         return userRepository.save(user);
     }
 

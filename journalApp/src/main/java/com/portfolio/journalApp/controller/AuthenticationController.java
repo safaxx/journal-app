@@ -9,6 +9,7 @@ import com.portfolio.journalApp.security.CustomUserDetailsService;
 import com.portfolio.journalApp.service.UserService;
 import com.portfolio.journalApp.utils.JWTUtil;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/user/sign-up")
-    public ResponseEntity<ResponseDTO> signUp(@RequestBody RegisterRequestDTO requestDTO) {
+    public ResponseEntity<ResponseDTO> signUp(@Valid @RequestBody RegisterRequestDTO requestDTO) {
 
         try {
             if (userService.findUser(requestDTO.getUsername()) != null) {
@@ -45,6 +46,7 @@ public class AuthenticationController {
             User user = new User();
             user.setUsername(requestDTO.getUsername());
             user.setPassword(requestDTO.getPassword());
+            user.setEmail(requestDTO.getEmail());
 
             User newUser = userService.saveUserInfo(user);
             if (newUser != null) {
@@ -65,13 +67,9 @@ public class AuthenticationController {
             UserDetails userDetails = userDetailsService.loadUserByUsername(requestDTO.getUsername());
             String jwt = jwtUtil.generateToken(userDetails.getUsername());
 
-            AuthResponseDTO authResponse = new AuthResponseDTO(
-                    jwt,
-                    userDetails.getUsername(),
-                    "Login successful"
-            );
+            AuthResponseDTO authResponse = new AuthResponseDTO(jwt, userDetails.getUsername());
             userService.updateLastLoginDate(userDetails.getUsername());
-            return new ResponseEntity<>(new ResponseDTO(true, authResponse), HttpStatus.OK);
+            return new ResponseEntity<>(new ResponseDTO(true, "Login successful", authResponse), HttpStatus.OK);
 
 
         } catch (BadCredentialsException e) {
@@ -127,6 +125,30 @@ public class AuthenticationController {
                     new ResponseDTO("Token validation failed"),
                     HttpStatus.UNAUTHORIZED
             );
+        }
+    }
+
+    @PostMapping("/admin/sign-up")
+    public ResponseEntity<ResponseDTO> signUpAdminUser(@RequestBody RegisterRequestDTO requestDTO) {
+
+        try {
+            if (userService.findUser(requestDTO.getUsername()) != null) {
+                return new ResponseEntity<>(new ResponseDTO("User already exists"), HttpStatus.BAD_REQUEST);
+            }
+
+            User user = new User();
+            user.setUsername(requestDTO.getUsername());
+            user.setPassword(requestDTO.getPassword());
+            user.setEmail(requestDTO.getEmail());
+
+            User newUser = userService.saveAdminUser(user);
+            if (newUser != null) {
+                return new ResponseEntity<>(new ResponseDTO(true, "Admin user registered successfully", newUser),
+                        HttpStatus.CREATED);
+            }
+            return new ResponseEntity<>(new ResponseDTO(false, "Admin registration failed"), HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ResponseDTO(false, "Admin registration failed" + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

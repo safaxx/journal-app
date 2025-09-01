@@ -1,16 +1,18 @@
 package com.portfolio.journalApp.controller;
 
-import com.portfolio.journalApp.dto.RegisterRequestDTO;
 import com.portfolio.journalApp.dto.ResponseDTO;
 import com.portfolio.journalApp.dto.UserJournalEntryDTO;
 import com.portfolio.journalApp.entity.JournalEntry;
 import com.portfolio.journalApp.entity.User;
-import com.portfolio.journalApp.service.JournalService;
+import com.portfolio.journalApp.service.JournalServiceOld;
 import com.portfolio.journalApp.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AdminController {
 
-    private final JournalService service;
+    private final JournalServiceOld service;
     private final UserService userService;
 
 
@@ -52,26 +54,4 @@ public class AdminController {
         return new ResponseEntity<>(users, HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping("/sign-up")
-    public ResponseEntity<ResponseDTO> signUpAdminUser(@RequestBody RegisterRequestDTO requestDTO) {
-
-        try {
-            if (userService.findUser(requestDTO.getUsername()) != null) {
-                return new ResponseEntity<>(new ResponseDTO("User already exists"), HttpStatus.BAD_REQUEST);
-            }
-
-            User user = new User();
-            user.setUsername(requestDTO.getUsername());
-            user.setPassword(requestDTO.getPassword());
-
-            User newUser = userService.saveAdminUser(user);
-            if (newUser != null) {
-                return new ResponseEntity<>(new ResponseDTO(true, "User Admin registered successfully", newUser),
-                        HttpStatus.CREATED);
-            }
-            return new ResponseEntity<>(new ResponseDTO(false, "User Admin registration failed"), HttpStatus.BAD_REQUEST);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ResponseDTO(false, "User Admin registration failed" + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 }

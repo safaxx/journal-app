@@ -53,7 +53,7 @@ public class UserController {
         User updatedUser = userService.updateUserProfile(userDetails.getUsername(), updateRequest);
         if (updatedUser != null) {
             return new ResponseEntity<>(
-                    new ResponseDTO("Profile updated successfully", updatedUser.getUsername()),
+                    new ResponseDTO(true, "Profile updated successfully", updatedUser.getUsername()),
                     HttpStatus.OK
             );
         }

@@ -1,7 +1,8 @@
 package com.portfolio.journalApp.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -9,7 +10,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
-//@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Setter
@@ -20,9 +20,12 @@ public class JournalEntry {
     @Id
     private String id;
 
-    @NonNull
+    @NotBlank(message = "Title is required")
+    @Size(max = 200, message = "Title cannot exceed 200 characters")
     private String title;
+
     private String content;
+
     private LocalDateTime createdDate;
 
     @DBRef

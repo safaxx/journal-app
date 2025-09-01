@@ -11,7 +11,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ResponseDTO {
 
-    private boolean success;
+    private boolean success = true;
     private String message;
     private Object data;
 
